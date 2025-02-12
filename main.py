@@ -47,7 +47,7 @@ args = parser.parse_args()
 
 def machine_learning(train_file, test_file):
     train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file, save=True)
-    
+
     vectorizer = TfidfVectorizer(max_features=1000)
     train_x = vectorizer.fit_transform(train_tweets).toarray()
     train_y = train_labels
@@ -168,6 +168,6 @@ if __name__=='__main__':
     train_file = "./data/datasets/ghosh/train_sample.txt"
     test_file = "./data/datasets/ghosh/test_sample.txt"
     if args.model == 'svm':
-        machine_learning()
+        machine_learning(train_file, test_file)
     else:
-        deep_learning()
+        deep_learning(train_file, test_file)
