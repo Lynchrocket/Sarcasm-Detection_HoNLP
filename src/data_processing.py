@@ -7,15 +7,17 @@ from nltk.stem.wordnet import WordNetLemmatizer
 import contractions
 import emoji
 
-import utils
+from . import utils
+
+cur_dir = os.getcwd()
 
 def get_dictionary():
-    dictionary_file = '../data/word_list.txt'
+    dictionary_file = f'{cur_dir}/data/word_list.txt'
     dictionary = utils.load_file(dictionary_file)
     return dictionary
 
 def get_stopwords():
-    stopwords_file = '../data/stopwords.txt'
+    stopwords_file = f'{cur_dir}/data/stopwords.txt'
     stopwords = utils.load_file(stopwords_file)
     return stopwords
 
@@ -76,17 +78,17 @@ def raw_clean(tweet):
     return ' '.join(valid_words)
 
 
-def grammatical_clean(tweet):
+def grammatical_clean(tweet, stopword=False):
     """
     clean a tweet by expanding contractions, and lemmatizing
     """
-    # stopwords = get_stopwords()
+    stopwords = get_stopwords()
     lemmatizer = WordNetLemmatizer()
     words = tweet.split()
     valid_words = []
     for word in words:
-        # if word.lower() in stopwords:
-        #     continue
+        if stopword and word.lower() in stopwords:
+            continue
         
         # process emoji
         if emoji.is_emoji(word):
@@ -117,17 +119,17 @@ def clean_tweet(tweet):
 
 def get_clean_data(train_filename, test_filename, save=False): 
     train_data = utils.load_csv_data(train_filename, ['Set', 'Label', 'Text'], sep='\t+')
-    train_tweets, train_labels = train_data['Text'], train_data['Label']
+    train_tweets, train_labels = train_data['Text'], train_data['Label'].apply(int)
 
     test_data = utils.load_csv_data(test_filename, ['Set', 'Label', 'Text'], sep='\t+')
-    test_tweets, test_labels = test_data['Text'], test_data['Label']
+    test_tweets, test_labels = test_data['Text'], test_data['Label'].apply(int)
 
     train_tweets = train_tweets.apply(clean_tweet)
     test_tweets = test_tweets.apply(clean_tweet)
 
     if save:
-        utils.save_file('train_tweets_clean.txt', train_tweets)
-        utils.save_file('test_tweets_clean.txt', test_tweets)
+        utils.save_file(f'{cur_dir}/processed_data/train_tweets_clean.txt', train_tweets)
+        utils.save_file(f'{cur_dir}/processed_data/test_tweets_clean.txt', test_tweets)
 
     return train_tweets, train_labels, test_tweets, test_labels
 
@@ -135,8 +137,8 @@ def get_clean_data(train_filename, test_filename, save=False):
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))    
 
-    train_filename = '../data/datasets/ghosh/train_sample.txt'
-    test_filename = '../data/datasets/ghosh/test_sample.txt'
+    train_filename = f'{cur_dir}/data/datasets/ghosh/train_sample.txt'
+    test_filename = f'{cur_dir}/data/datasets/ghosh/test_sample.txt'
 
     train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_filename, test_filename, save=True)
 
