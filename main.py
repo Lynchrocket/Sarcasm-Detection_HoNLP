@@ -45,12 +45,9 @@ parser.add_argument("--vectorize",default='skipgram',type=str,help="The kind of 
 parser.add_argument("--save",default=True,type=bool,help="whether to save")
 args = parser.parse_args()
 
-def machine_learning():
-    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(
-        "./data/datasets/ghosh/train_sample.txt",
-        "./data/datasets/ghosh/test_sample.txt",
-        save=True
-    )
+def machine_learning(train_file, test_file):
+    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file, save=True)
+    
     vectorizer = TfidfVectorizer(max_features=1000)
     train_x = vectorizer.fit_transform(train_tweets).toarray()
     train_y = train_labels
@@ -66,12 +63,8 @@ def machine_learning():
         joblib.dump(model, f"./model/model_{args.model}.pkl")
         # model = joblib.load("...")
 
-def deep_learning():
-    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(
-        "./data/datasets/ghosh/train_sample.txt",
-        "./data/datasets/ghosh/test_sample.txt",
-        save=True
-    )
+def deep_learning(train_file, test_file):
+    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file, save=True)
 
     train_tokens = train_tweets.apply(lambda x: x.split())
     test_tokens = test_tweets.apply(lambda x: x.split())
@@ -172,6 +165,8 @@ def deep_learning():
         # model = torch.load("...")
 
 if __name__=='__main__':
+    train_file = "./data/datasets/ghosh/train_sample.txt"
+    test_file = "./data/datasets/ghosh/test_sample.txt"
     if args.model == 'svm':
         machine_learning()
     else:
