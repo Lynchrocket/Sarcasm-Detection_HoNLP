@@ -148,7 +148,6 @@ def deep_learning():
             out = model(feature)
 
             predicted = []
-            out_probs = []
 
             predicted = torch.tensor([1 if i == True else 0 for i in out > 0.5])
             loss = criterion(out.squeeze(), target.float())
