@@ -8,10 +8,6 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from wordcloud import WordCloud
-from collections import Counter
 from tqdm import tqdm
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -123,7 +119,7 @@ def deep_learning(train_file, test_file):
         history['train_acc'].append(train_acc / len(train_dataloader))
 
     history_df = pd.DataFrame(history).set_index('epoch')
-    history_df.to_csv(f'./history/train_history_{args.model}_{random.random()}.csv')
+    history_df.to_csv(f'./history/train_history_{args.model}_{args.vectorize}_{random.random()}.csv')
 
     # test loop
     model.eval()
@@ -161,10 +157,10 @@ def deep_learning(train_file, test_file):
     print(classification_report(all_predicted, all_target))
 
     if args.save:
-        torch.save(model, f"./model/model_{args.model}_{num_epochs}.pth")
+        torch.save(model, f"./model/model_{args.model}_{args.vectorize}_{num_epochs}.pth")
         # model = torch.load("...")
 
-if __name__=='__main__':
+if __name__ == '__main__':
     train_file = "./data/datasets/ghosh/train_sample.txt"
     test_file = "./data/datasets/ghosh/test_sample.txt"
     if args.model == 'svm':
