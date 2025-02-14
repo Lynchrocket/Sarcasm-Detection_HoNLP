@@ -149,8 +149,21 @@ The LSTM model aimed to capture long-range dependencies within the text. Similar
 
 The code of SVM and neural network was implemented using Sklearn and Pytorch library, respectively.
 
-\section{Experimental Analysis}
+\section{Experimental Analysis}%这里放图片，图片在visualization文件夹里
 The models were evaluated using standard classification metrics, including accuracy, precision, recall, and F1-score. We focused on maximizing the F1-score to balance the model’s performance in identifying both sarcastic and non-sarcastic tweets. 
+%这里可放SVM的两张图。
+SVM model has bad performance, it trends to classify no-sarcasm sentences in sarcasm sentences.
+%这里放CNNSKIPgram
+CNN skip-gram model has bad performance too. But it trends to classify sarcasm sentences to no-sarcasm sentences.
+%CNN fasttext
+CNN fasttext is worse than CNN skip-gram. It trends to classify sarcasm sentences to no-sarcastic sentences too.
+%LSTM SJIP-GRAM
+LSTM skip-gram model is very good in classify non sarcasm model.
+%LSTM FASTTEXT
+LSTM fasttext is weaker in classifying no-sarcasm sentences but a little better in sarcasm sentences compared with LSTM skip-gram.
+%comparison图
+We can't reache the result as papper. There are two main reasons: Our train size and test size are not as large as paper because of bad CPU. Another one is that paper keeps all username,and discover username is very important in sarcasm detction.
+We discovered both in our result and paper, deep learning model is better than simple model as SVM, Specially,LSTM and skip-gram works best, Because this task focus more on contextual information not in part information ,so LSTM and skip-gram works better.
 
 
 \section{Conclusion and Future work}
