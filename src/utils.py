@@ -10,8 +10,9 @@ def load_file(filename):
     return text
 
 def load_csv_data(filename, header=None, sep='\t+'):
-    data = pd.read_csv(filename, sep=sep, header='infer' if header is None else None, engine='python')
-    data.columns = header
+    data = pd.read_csv(filename, sep=sep, header='infer' if header is None else None, engine='python', index_col=None)
+    if header is not None:
+        data.columns = header
     return data
 
 def save_file(filename, data):

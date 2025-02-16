@@ -12,8 +12,7 @@ from tqdm import tqdm
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import joblib
-from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score
-from sklearn.manifold import TSNE
+from sklearn.metrics import classification_report
 
 import src.utils as utils
 from src.data_processing import get_clean_data
@@ -38,11 +37,13 @@ class TextDataset(Dataset):
 parser = argparse.ArgumentParser()
 parser.add_argument("--model",default='cnn',type=str,help="The kind of model")
 parser.add_argument("--vectorize",default='skipgram',type=str,help="The kind of vectorization")
+parser.add_argument("--epochs",default=10,type=int,help="number of epochs")
+parser.add_argument("--bs",default=32,type=int,help="batch size")
 parser.add_argument("--save",default=True,type=bool,help="whether to save")
 args = parser.parse_args()
 
 def machine_learning(train_file, test_file):
-    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file, save=True)
+    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file)
 
     vectorizer = TfidfVectorizer(max_features=1000)
     train_x = vectorizer.fit_transform(train_tweets).toarray()
@@ -51,8 +52,10 @@ def machine_learning(train_file, test_file):
     test_y = test_labels
 
     model = SVC(kernel="linear")
+    print('SVM is fitting')
     model.fit(train_x, train_y)
     
+    print('SVM is testing')
     pred_y = model.predict(test_x)
     print(classification_report(test_y, pred_y))
     if args.save:
@@ -60,7 +63,10 @@ def machine_learning(train_file, test_file):
         # model = joblib.load("...")
 
 def deep_learning(train_file, test_file):
-    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file, save=True)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f'{device} is using.')
+
+    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file)
 
     train_tokens = train_tweets.apply(lambda x: x.split())
     test_tokens = test_tweets.apply(lambda x: x.split())
@@ -68,7 +74,7 @@ def deep_learning(train_file, test_file):
     word2vec, word2int = utils.get_word2vec_model(train_tokens, model_type=args.vectorize)
 
     max_len = utils.get_max_len(train_tweets)
-    batch_size = 32
+    batch_size = args.bs
     train_dataset = TextDataset(train_tweets, train_labels, max_len, word2int)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_dataset = TextDataset(test_tweets, test_labels, max_len, word2int)
@@ -78,13 +84,14 @@ def deep_learning(train_file, test_file):
     vocab_size = len(word2int) + 1
     embedding_matrix = utils.get_word2vec_embeddings(word2vec, word2int, embedding_dim)
 
-    num_epochs = 50
+    num_epochs = args.epochs
     epochloop = tqdm(range(num_epochs), position=0, desc='Training', leave=True)
 
     if args.model == 'cnn':
         model = CNN(embedding_matrix, vocab_size, max_len, embedding_dim)
     else:
         model = LSTM(embedding_matrix, vocab_size, embedding_dim)
+    model = model.to(device)
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -99,19 +106,20 @@ def deep_learning(train_file, test_file):
         train_loss = 0
         train_acc = 0
         for idx, (batch_X, batch_y) in enumerate(train_dataloader):
+            batch_X, batch_y = batch_X.to(device), batch_y.to(device)
+
             optimizer.zero_grad()
             outputs = model(batch_X)
             train_loss = criterion(outputs.squeeze(), batch_y.float())
 
-            predicted = torch.tensor([1 if i == True else 0 for i in outputs > 0.5])
-            equals = predicted == batch_y
-            acc = torch.mean(equals.type(torch.FloatTensor))
+            predicted = (outputs > 0.5).float()
+            acc = (predicted == batch_y).float().mean()
             train_acc += acc.item()
 
             train_loss.backward()
             optimizer.step()
 
-            if(idx % 100 == 0):
+            if idx % 100 == 0:
                 print(f"Epoch {epoch}, Step {idx}, Loss: {train_loss.item()}")
 
         history['epoch'].append(epoch)
@@ -134,11 +142,13 @@ def deep_learning(train_file, test_file):
     testloop = tqdm(test_dataloader, leave=True, desc='Inference')
     with torch.no_grad():
         for feature, target in testloop:
+            feature, target = feature.to(device), target.to(device)
+
             out = model(feature)
 
             predicted = []
 
-            predicted = torch.tensor([1 if i == True else 0 for i in out > 0.5])
+            predicted = (out > 0.5).float()
             loss = criterion(out.squeeze(), target.float())
             
             equals = predicted == target
@@ -161,8 +171,8 @@ def deep_learning(train_file, test_file):
         # model = torch.load("...")
 
 if __name__ == '__main__':
-    train_file = "./data/datasets/ghosh/train_sample.txt"
-    test_file = "./data/datasets/ghosh/test_sample.txt"
+    train_file = "./data/datasets/ghosh/train.txt"
+    test_file = "./data/datasets/ghosh/test.txt"
     if args.model == 'svm':
         machine_learning(train_file, test_file)
     else:

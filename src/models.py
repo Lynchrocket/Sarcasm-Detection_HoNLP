@@ -1,8 +1,6 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 from transformers import BertModel
 
 class CNN(nn.Module):
@@ -66,15 +64,14 @@ class Bidirectional_LSTM(nn.Module):
         return x
 
 class BERT(nn.Module):
-    """
-    output_dim=1
-    """
-    def __init__(self, output_dim):
+    def __init__(self, output_dim=1):
         super(BERT, self).__init__()
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.fc = nn.Linear(self.bert.config.hidden_size, output_dim)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         _, x = self.bert(x)
         x = self.fc(x)
+        x = self.sigmoid(x)
         return x

@@ -17,4 +17,4 @@ CNN
 
 LSTM
 
-BERT
+BERT (abandoned)

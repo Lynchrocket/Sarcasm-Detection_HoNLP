@@ -8,18 +8,22 @@ import contractions
 import emoji
 
 from . import utils
+# import utils
 
-cur_dir = os.getcwd()
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_dictionary():
-    dictionary_file = f'{cur_dir}/data/word_list.txt'
+    dictionary_file = f'{parent_dir}/data/word_list.txt'
     dictionary = utils.load_file(dictionary_file)
     return dictionary
 
 def get_stopwords():
-    stopwords_file = f'{cur_dir}/data/stopwords.txt'
+    stopwords_file = f'{parent_dir}/data/stopwords.txt'
     stopwords = utils.load_file(stopwords_file)
     return stopwords
+
+dictionary = get_dictionary()
+stopwords = get_stopwords()
 
 def camel_split(term):
     # add white space before every number
@@ -52,7 +56,6 @@ def process_hashtag(hashtag, dictionary):
         return split
         
 def raw_clean(tweet):
-    dictionary = get_dictionary()
     # Add white space before every punctuation sign so that we can split around it and keep it
     tweet = re.sub('([!?*&%"~`^+{}])', r' \1 ', tweet)
     tweet = re.sub('\s{2,}', ' ', tweet)
@@ -82,7 +85,6 @@ def grammatical_clean(tweet, stopword=False):
     """
     clean a tweet by expanding contractions, and lemmatizing
     """
-    stopwords = get_stopwords()
     lemmatizer = WordNetLemmatizer()
     words = tweet.split()
     valid_words = []
@@ -117,30 +119,48 @@ def clean_tweet(tweet):
     tweet = grammatical_clean(tweet)
     return tweet
 
-def get_clean_data(train_filename, test_filename, save=False): 
-    train_data = utils.load_csv_data(train_filename, ['Set', 'Label', 'Text'], sep='\t+')
-    train_tweets, train_labels = train_data['Text'], train_data['Label'].apply(int)
+def get_clean_data(train_filename, test_filename):
+    train_save_filename = f"{parent_dir}/processed_data/{train_filename.split('/')[-1].split('.')[0]}_tweets_clean.csv"
+    test_save_filename = f"{parent_dir}/processed_data/{test_filename.split('/')[-1].split('.')[0]}_tweets_clean.csv"
 
-    test_data = utils.load_csv_data(test_filename, ['Set', 'Label', 'Text'], sep='\t+')
-    test_tweets, test_labels = test_data['Text'], test_data['Label'].apply(int)
+    if os.path.exists(train_save_filename):
+        train_data = utils.load_csv_data(train_save_filename, sep=',')
+        train_tweets, train_labels = train_data['Text'], train_data['Label'].apply(int)
+    else:
+        train_data = utils.load_csv_data(train_filename, header=['Set', 'Label', 'Text'], sep='\t+')
+        train_tweets, train_labels = train_data['Text'], train_data['Label'].apply(int)
+        
+        train_tweets = train_tweets.apply(clean_tweet)
+        
+        train_df = pd.DataFrame({ 'Label': train_labels, 'Text': train_tweets })
+        train_df.to_csv(train_save_filename, index=False)
 
-    train_tweets = train_tweets.apply(clean_tweet)
-    test_tweets = test_tweets.apply(clean_tweet)
+    if os.path.exists(test_save_filename):
+        test_data = utils.load_csv_data(train_save_filename, sep=',')
+        test_tweets, test_labels = test_data['Text'], test_data['Label'].apply(int)
+    else:
+        test_data = utils.load_csv_data(test_filename, header=['Set', 'Label', 'Text'], sep='\t+')
+        test_tweets, test_labels = test_data['Text'], test_data['Label'].apply(int)
 
-    if save:
-        utils.save_file(f'{cur_dir}/processed_data/train_tweets_clean.txt', train_tweets)
-        utils.save_file(f'{cur_dir}/processed_data/test_tweets_clean.txt', test_tweets)
+        test_tweets = test_tweets.apply(clean_tweet)
+
+        test_df = pd.DataFrame({ 'Label': test_labels, 'Text': test_tweets })
+        test_df.to_csv(test_save_filename, index=False)
 
     return train_tweets, train_labels, test_tweets, test_labels
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))    
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    train_filename = f'{cur_dir}/data/datasets/ghosh/train_sample.txt'
-    test_filename = f'{cur_dir}/data/datasets/ghosh/test_sample.txt'
+    train_filename = f'{parent_dir}/data/datasets/ghosh/train.txt'
+    test_filename = f'{parent_dir}/data/datasets/ghosh/test.txt'
 
-    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_filename, test_filename, save=True)
+    import time
+    st = time.time()
+    train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_filename, test_filename)
+    ed = time.time()
+    print(ed - st)
 
     print(train_tweets.head())
     print(test_tweets.head())
