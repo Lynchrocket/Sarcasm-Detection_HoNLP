@@ -136,7 +136,7 @@ def get_clean_data(train_filename, test_filename):
         train_df.to_csv(train_save_filename, index=False)
 
     if os.path.exists(test_save_filename):
-        test_data = utils.load_csv_data(train_save_filename, sep=',')
+        test_data = utils.load_csv_data(test_save_filename, sep=',')
         test_tweets, test_labels = test_data['Text'], test_data['Label'].apply(int)
     else:
         test_data = utils.load_csv_data(test_filename, header=['Set', 'Label', 'Text'], sep='\t+')
