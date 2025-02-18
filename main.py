@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 import numpy as np
 from sklearn.svm import SVC
@@ -45,8 +46,12 @@ args = parser.parse_args()
 def machine_learning(train_file, test_file):
     train_tweets, train_labels, test_tweets, test_labels = get_clean_data(train_file, test_file)
 
-    vectorizer = TfidfVectorizer(max_features=1000)
-    train_x = vectorizer.fit_transform(train_tweets).toarray()
+    if os.path.exists('./model/tfidf.pkl'):
+        vectorizer = joblib.load('./model/tfidf.pkl')
+    else:
+        vectorizer = TfidfVectorizer(max_features=1000)
+        train_x = vectorizer.fit_transform(train_tweets).toarray()
+        joblib.dump(vectorizer, './model/tfidf.pkl')
     train_y = train_labels
     test_x = vectorizer.transform(test_tweets).toarray()
     test_y = test_labels
@@ -164,7 +169,7 @@ def deep_learning(train_file, test_file):
         print(f'Accuracy: {test_acc/len(test_dataloader):.4f}, Loss: {test_loss/len(test_dataloader):.4f}')
 
 
-    print(classification_report(all_predicted, all_target))
+    print(classification_report(all_target, all_predicted))
 
     if args.save:
         torch.save(model, f"./model/model_{args.model}_{args.vectorize}_{num_epochs}.pth")
