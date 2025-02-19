@@ -26,7 +26,7 @@ class CNN(nn.Module):
         x = self.relu(x)
         x = self.dropout(x)
         x = self.fc2(x)
-        x = self.sigmoid(x)
+        # x = self.sigmoid(x)# 建议这里也换成和LSTM一样的操作，结果预计会更好看
         return x
 
 class LSTM(nn.Module):
@@ -43,7 +43,8 @@ class LSTM(nn.Module):
         _, (hidden, _) = self.lstm(x)
         x = self.dropout(hidden[-1])
         x = self.fc(x)
-        x = self.sigmoid(x)
+        # x = self.sigmoid(x): Sigmoid() 可能导致梯度消失或收敛到单一类别,Sigmoid() 会把输出压缩到 0~1，如果模型训练不充分，可能会全部趋向于 0（即 Non-Sarcasm）
+        #在这里去掉sigmod(),在prediction里面加东西
         return x
     
 class Bidirectional_LSTM(nn.Module):
