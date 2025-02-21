@@ -45,7 +45,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Sarcasm detection is a challenging task in Natural Language Processing (NLP) due to its implicit nature, where the intended meaning often contrasts with the literal text. Accurately identifying sarcasm is crucial for sentiment analysis, opinion mining, and conversational AI. In this study, we employ FastText and Skip-Gram for word vectorization, leveraging its ability to capture subword information and enhance word representations. These embeddings are then applied to CNN and LSTM to evaluate their effectiveness in sarcasm classification. Besides, we use SVM as a baseline model for comparison to exemplify the ability of neural networks in distinguishing sarcastic texts. The study hypothesizes that LSTM will excel in detecting sarcasm due to its ability to capture long-range dependencies, while CNN may be effective in identifying localized sarcasm patterns. The results are expected to shed light on the strengths and limitations of each model, offering insights to improve sarcasm detection techniques.
+Sarcasm detection is a challenging task in Natural Language Processing (NLP) due to its implicit nature, where the intended meaning often contrasts with the literal text. Accurately identifying sarcasm is crucial for sentiment analysis, opinion mining, and conversational AI. In this study, we employ FastText and SkipGram for word vectorization, leveraging its ability to capture subword information and enhance word representations. These embeddings are then applied to CNN and LSTM to evaluate their effectiveness in sarcasm classification. Besides, we use SVM as a baseline model for comparison to exemplify the ability of neural networks in distinguishing sarcastic texts. The study hypothesizes that LSTM will excel in detecting sarcasm due to its ability to capture long-range dependencies, while CNN may be effective in identifying localized sarcasm patterns. The results are expected to shed light on the strengths and limitations of each model, offering insights to improve sarcasm detection techniques.
 \end{abstract}
 
 \section{Introduction}
@@ -56,7 +56,7 @@ With the advancement of deep learning and large-scale language models, sarcasm d
 By improving sarcasm detection, NLP models can become more adept at reasoning about implicit information, ultimately enhancing their adaptability to fields like literary analysis, customer sentiment analysis, and humor recognition. This project explores various techniques to build a robust sarcasm detection model and investigates how AI can be trained to recognize and even generate sarcastic expressions for improved language understanding.
 
 \section{Methods}
-In this study, we build upon the work of \emph{Fracking Sarcasm using Neural Networks} \cite{ghosh2016magnets}, who explored sarcasm detection using neural networks without explicit word vectorization techniques. Unlike their approach, we utilize FastText and Skip-Gram to vectorize the words and compare its effectiveness in sarcasm detection. FastText enables our models to capture subword information, making it particularly useful for handling informal and creative sarcastic expressions. We apply these embeddings to CNN and LSTM. Besides, we use SVM as a baseline model for comparison to exemplify the ability of neural networks in distinguishing sarcastic texts.
+In this study, we build upon the work of \emph{Fracking Sarcasm using Neural Networks} \cite{ghosh2016magnets}, who explored sarcasm detection using neural networks without explicit word vectorization techniques. Unlike their approach, we utilize FastText and SkipGram to vectorize the words and compare its effectiveness in sarcasm detection. FastText enables our models to capture subword information, making it particularly useful for handling informal and creative sarcastic expressions. We apply these embeddings to CNN and LSTM. Besides, we use SVM as a baseline model for comparison to exemplify the ability of neural networks in distinguishing sarcastic texts.
 
 By leveraging word vectorization, our study seeks to determine whether explicitly learned embeddings enhance sarcasm detection compared to previous neural network approaches. Through empirical evaluation, we aim to provide insights into the advantages and limitations of different architectures and contribute to the development of more effective sarcasm detection models.
 
@@ -81,7 +81,7 @@ Sarcastic & Non-sarcastic \\ \hline
 
 In detail, the dataset is constructed by collecting tweets that explicitly contain the \texttt{\#sarcasm} hashtag as a retrieval cue. Since relying solely on this heuristic might overlook sarcastic tweets without such explicit markers, the list of indicative hashtags is expanded using an \textbf{LSA-based approach}, incorporating tags like \texttt{\#sarcastic}, \texttt{\#yeahright}, and other related terms. Additionally, tweets from users with a strong inclination toward either sincerity or sarcasm (e.g., professional comedians) are included to enhance dataset quality.
 
-Unlike previous works, we used \textbf{SVM} as our baseline classification model and used Skip-Gram and Fasttext for word embeddings. Initially, we conducted experiments on smaller subsets (\texttt{train\_sample} and \texttt{test\_sample}) to validate our approach before applying it to the full \texttt{train} and \texttt{test} sets.
+Unlike previous works, we used \textbf{SVM} as our baseline classification model and used SkipGram and FastText for word embeddings. Initially, we conducted experiments on smaller subsets (\texttt{train\_sample} and \texttt{test\_sample}) to validate our approach before applying it to the full \texttt{train} and \texttt{test} sets.
 
 \section{Data Preprocessing}
 In \textbf{data preprocessing}, we made several works:
@@ -155,7 +155,7 @@ The code of SVM and neural network was implemented using Sklearn and Pytorch lib
 The models were evaluated using standard classification metrics, including accuracy, precision, recall, and F1-score. We focused on maximizing the F1-score to balance the model’s performance in identifying both sarcastic and non-sarcastic tweets. 
 
 %这里可放SVM的两张图。
-As shown in Figure \ref{fig:svmcr} and \ref{fig:svmcm}, SVM model demonstrates reasonable performance, particularly in detecting sarcastic instances (recall = 0.73). However, false positives (FP = 4) and false negatives (FN = 3) indicate that the classifier struggles to differentiate between sarcasm and non-sarcasm effectively.
+As shown in Figure \ref{fig:svmcr} and \ref{fig:svmcm}, SVM model demonstrates reasonable performance, particularly in detecting non-sarcastic tweets (F1-score: 0.67). However, it has a higher precision (0.71) for non-sarcastic but lower recall (0.57) for sarcastic, suggesting it often mis-classifies sarcastic tweets as non-sarcastic.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=.8\linewidth]{pic/SVM-Report.png}
@@ -164,73 +164,72 @@ As shown in Figure \ref{fig:svmcr} and \ref{fig:svmcm}, SVM model demonstrates r
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/SVM-Confusion-Matrix.png}
+    \includegraphics[width=.8\linewidth]{pic/SVM-Matrix.png}
     \caption{Confusion Matrix of SVM}
     \label{fig:svmcm}
 \end{figure}
 
 %这里放CNNSKIPgram
-As shown in Figure \ref{fig:sgcnncr} and \ref{fig:sgcnncm}, CNN model using Skip-Gram word vectorization has a better performance, especially in classifying non-sarcastic tweets. But it tends to classify sarcasm tweets to non-sarcasm tweets.
+As shown in Figure \ref{fig:sgcnncr} and \ref{fig:sgcnncm}, CNN model using SkipGram word vectorization has a better performance, especially in classifying non-sarcastic tweets. It achieves a high score of accuracy (0.79) in sarcasm detection.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=.8\linewidth]{pic/CNN-Skipgram-Report.png}
-    \caption{Skip-gram \& CNN Classification Report}
+    \caption{SkipGram \& CNN Classification Report}
     \label{fig:sgcnncr}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/CNN-skipgram-Matrix.png}
-    \caption{Confusion Matrix of Skip-gram \& CNN}
+    \includegraphics[width=.8\linewidth]{pic/CNN-Skipgram-Matrix.png}
+    \caption{Confusion Matrix of SkipGram \& CNN}
     \label{fig:sgcnncm}
 \end{figure}
 
 %CNN fasttext
-As shown in Figure \ref{fig:ftcnncr} and \ref{fig:ftcnncm}, CNN model using Fasttext word vectorization is worse than CNN using Skip-Gram. Plenty of sarcastic tweets are classified to be non-sarcastic. Compared to CNNs using Skip-Gram, Fasttext does not provide better word vectors to reveal the connections behind words that may be indicative of sarcasm.
+As shown in Figure \ref{fig:ftcnncr} and \ref{fig:ftcnncm}, CNN model using FastText word vectorization performs similarly to CNN using SkipGram, but is slightly inferior. Compared to SkipGram, FastText does not provide better word vectors to reveal connections behind words that may indicate sarcasm, but it can provide connections between different grammatical forms of the same word that have actually been eliminated by lemmatization in data preprocessing.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/CNN-fasttext-Report.png}
-    \caption{Fasttext \& CNN Classification Report}
+    \includegraphics[width=.8\linewidth]{pic/CNN-Fasttext-Report.png}
+    \caption{FastText \& CNN Classification Report}
     \label{fig:ftcnncr}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/CNN-fasttext-Matrix.png}
-    \caption{Confusion Matrix of Fasttext \& CNN}
+    \includegraphics[width=.8\linewidth]{pic/CNN-Fasttext-Matrix.png}
+    \caption{Confusion Matrix of FastText \& CNN}
     \label{fig:ftcnncm}
 \end{figure}
 
 %LSTM SJIP-GRAM
-As shown in Figure \ref{fig:sglstmcr} and \ref{fig:sglstmcm}, among all the models, the LSTM model using Skip-Gram word vectorization performed the best with the highest accuracy of 0.70.
+The results of the LSTM model using Skip-Gram word vectorization are shown in Figure \ref{fig:sglstmcr} and \ref{fig:sglstmcm}, and the results of the LSTM model using FastText word vectorization are shown in Figure \ref{fig:ftlstmcr} and \ref{fig:ftlstmcm}. We can see that the LSTM model is unable to distinguish between sarcastic tweets and non-sarcastic tweets, and all sarcastic tweets are regarded as non-sarcastic tweets. Since the LSTM model is highly dependent on the textual context and the tweets are relatively short, it is difficult to have a strong contextual connection, so the result is very poor.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=.8\linewidth]{pic/LSTM-Skipgram-Report.png}
-    \caption{Skip-gram \& LSTM Classification Report}
+    \caption{SkipGram \& LSTM Classification Report}
     \label{fig:sglstmcr}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/LSTM-skipgram-Matrix.png}
-    \caption{Confusion Matrix of Skip-gram \& LSTM}
+    \includegraphics[width=.8\linewidth]{pic/LSTM-Skipgram-Matrix.png}
+    \caption{Confusion Matrix of SkipGram \& LSTM}
     \label{fig:sglstmcm}
 \end{figure}
 
 %LSTM FASTTEXT
-As shown in Figure \ref{fig:ftlstmcr} and \ref{fig:ftlstmcm}, LSTM model using Fasttext word vectorization is weaker in classifying non-sarcastic tweets but a bit better in sarcastic tweets compared with LSTM skip-gram.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/LSTM-fasttext-Report.png}
-    \caption{Fasttext \& LSTM Classification Report}
+    \includegraphics[width=.8\linewidth]{pic/LSTM-Fasttext-Report.png}
+    \caption{FastText \& LSTM Classification Report}
     \label{fig:ftlstmcr}
 \end{figure}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=.8\linewidth]{pic/LSTM-fasttext-Matrix.png}
-    \caption{Confusion Matrix of Fasttext \& LSTM}
+    \includegraphics[width=.8\linewidth]{pic/LSTM-Fasttext-Matrix.png}
+    \caption{Confusion Matrix of FastText \& LSTM}
     \label{fig:ftlstmcm}
 \end{figure}
 
 %comparison图
-Figure \ref{fig:comp} is the comparison plot of the 4 scores for the different models. The accuracy scores are not provided in the references, so the bars for accuracy are missing from the plot. From the references and our research results, we found that deep learning models work better than simple machine learning models such as SVMs, especially LSTM using Skip-Gram works best because this task focuses more on contextual information rather than partial and isolated information.
+Figure \ref{fig:comp} is the comparison plot of the 4 scores for the different models. The accuracy scores are not provided in the references, so the bars for accuracy are missing from the plot. From the references and our research results, we found that deep learning models work better than simple machine learning models such as SVMs, especially CNN using SkipGram works best.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{pic/Comparison.png}
@@ -246,7 +245,7 @@ However, we were unable to obtain results as good as those in the references due
 \end{itemize}
 
 \section{Conclusion and Future work}
-In this project, we tackled sarcasm detection using SVM, CNN, and LSTM models, along with word embeddings like SkipGram and FastText. Our experiments showed that LSTM outperformed the other models in capturing the contextual nuances of sarcasm, while Skip-Gram provided better handling of rare words. Although the models performed well, there is still room for improvement in dealing with more complex sarcastic contexts.
+In this project, we tackled sarcasm detection using SVM, CNN, and LSTM models, along with word embeddings like SkipGram and FastText. Our experiments showed that CNN outperformed the other models in capturing the essence of sarcasm, while SkipGram provided better handling of rare words. Although the models performed well, there is still room for improvement in dealing with more complex sarcastic contexts.
 
 Future research could focus on exploring advanced models like Transformer and BERT, or employing ensemble techniques to further boost performance. Extending sarcasm detection to other languages, incorporating more contextual features such as sentiment or pragmatic cues, and using more diverse datasets would also help improve the model. Additionally, integrating multimodal data like images or audio could provide a more comprehensive understanding of sarcasm.
 

@@ -30,7 +30,7 @@ class CNN(nn.Module):
         return x
 
 class LSTM(nn.Module):
-    def __init__(self, embedding_matrix, vocab_size, embed_dim, hidden_dim=64, num_layers=1): 
+    def __init__(self, embedding_matrix, vocab_size, embed_dim, hidden_dim=128, num_layers=1): 
         super(LSTM, self).__init__()
         self.embedding = nn.Embedding.from_pretrained(torch.tensor(embedding_matrix, dtype=torch.float32), freeze=False)
         self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers, batch_first=True)
