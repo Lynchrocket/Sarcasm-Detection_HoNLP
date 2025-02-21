@@ -80,13 +80,10 @@ def predict(train_file, test_file, model_name, model_file_path):
             feature, target = feature.to(device), target.to(device)
 
             out = model(feature)
-
-            predicted = []
+            loss = criterion(out.squeeze(), target.float())
 
             # predicted = (out > 0.5).float(）
-            predicted = torch.sigmoid(out) > 0.5
-       
-            loss = criterion(out.squeeze(), target.float())
+            predicted = (torch.sigmoid(out) > 0.5).float()
             
             equals = predicted == target
 

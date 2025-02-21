@@ -48,6 +48,7 @@ def machine_learning(train_file, test_file):
 
     if os.path.exists('./model/tfidf.pkl'):
         vectorizer = joblib.load('./model/tfidf.pkl')
+        train_x = vectorizer.transform(train_tweets).toarray()
     else:
         vectorizer = TfidfVectorizer(max_features=1000)
         train_x = vectorizer.fit_transform(train_tweets).toarray()
@@ -97,7 +98,8 @@ def deep_learning(train_file, test_file):
     else:
         model = LSTM(embedding_matrix, vocab_size, embedding_dim)
     model = model.to(device)
-    criterion = nn.BCELoss()
+    # criterion = nn.BCELoss()
+    criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     history = {
@@ -117,11 +119,15 @@ def deep_learning(train_file, test_file):
             outputs = model(batch_X)
             train_loss = criterion(outputs.squeeze(), batch_y.float())
 
-            predicted = (outputs > 0.5).float()
+            # predicted = (outputs > 0.5).float()
+            predicted = torch.sigmoid(outputs) > 0.5
             acc = (predicted == batch_y).float().mean()
             train_acc += acc.item()
 
             train_loss.backward()
+            
+            if args.model == 'lstm':
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=20, norm_type=2)
             optimizer.step()
 
             if idx % 100 == 0:
@@ -150,11 +156,10 @@ def deep_learning(train_file, test_file):
             feature, target = feature.to(device), target.to(device)
 
             out = model(feature)
-
-            predicted = []
-
-            predicted = (out > 0.5).float()
             loss = criterion(out.squeeze(), target.float())
+
+            # predicted = (out > 0.5).float()
+            predicted = (torch.sigmoid(out) > 0.5).float()
             
             equals = predicted == target
 
